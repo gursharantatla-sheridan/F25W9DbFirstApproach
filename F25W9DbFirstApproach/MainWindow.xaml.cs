@@ -20,9 +20,88 @@ namespace F25W9DbFirstApproach
     /// </summary>
     public partial class MainWindow : Window
     {
+        SchoolDBEntities db = new SchoolDBEntities();
+
         public MainWindow()
         {
             InitializeComponent();
+        }
+
+        private void LoadStudents()
+        {
+            var students = db.Students.ToList();
+            grdStudents.ItemsSource = students;
+        }
+
+        private void btnLoadStudents_Click(object sender, RoutedEventArgs e)
+        {
+            LoadStudents();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            var standards = db.Standards.ToList();
+
+            cmbStandard.ItemsSource = standards;
+            cmbStandard.DisplayMemberPath = "StandardName";
+            cmbStandard.SelectedValuePath = "StandardId";
+        }
+
+        private void btnFind_Click(object sender, RoutedEventArgs e)
+        {
+            int id = Convert.ToInt32(txtId.Text);
+            var std = db.Students.Find(id);
+
+            if (std != null)
+            {
+                txtName.Text = std.StudentName;
+                cmbStandard.SelectedValue = std.StandardId;
+            }
+            else
+            {
+                txtName.Text = "";
+                cmbStandard.SelectedIndex = -1;
+                MessageBox.Show("Invalid ID. Please try again");
+            }
+        }
+
+        private void btnInsert_Click(object sender, RoutedEventArgs e)
+        {
+            Student std = new Student();
+            std.StudentName = txtName.Text;
+            std.StandardId = (int)cmbStandard.SelectedValue;
+
+            db.Students.Add(std);
+            db.SaveChanges();
+
+            LoadStudents();
+            MessageBox.Show("New student added");
+        }
+
+        private void btnUpdate_Click(object sender, RoutedEventArgs e)
+        {
+            int id = Convert.ToInt32(txtId.Text);
+            var std = db.Students.Find(id);
+
+            std.StudentName = txtName.Text;
+            std.StandardId = (int)cmbStandard.SelectedValue;
+
+            db.SaveChanges();
+
+            LoadStudents();
+            MessageBox.Show("Student updated");
+        }
+
+        private void btnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            int id = Convert.ToInt32(txtId.Text);
+            var std = db.Students.Find(id);
+
+            db.Students.Remove(std);
+            db.SaveChanges();
+
+            LoadStudents();
+            MessageBox.Show("Student deleted");
         }
     }
 }
